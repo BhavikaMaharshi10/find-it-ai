@@ -1,0 +1,72 @@
+@use '../styles/abstracts' as *;
+
+.applications-header {
+  @include flex-between;
+  margin-bottom: $spacing-xl;
+  flex-wrap: wrap;
+  gap: $spacing-md;
+}
+
+.view-toggle {
+  display: flex;
+  gap: $spacing-xs;
+}
+
+.kanban-board {
+  display: grid;
+  gap: $spacing-md;
+  overflow-x: auto;
+
+  @include respond-to(md) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  @include respond-to(lg) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.kanban-column {
+  min-width: 200px;
+  background: rgba($neutral-light, 0.1);
+  border-radius: $radius-lg;
+  padding: $spacing-md;
+
+  &__title {
+    font-size: $font-size-sm;
+    font-weight: $font-weight-semibold;
+    margin-bottom: $spacing-md;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__count {
+    background: var(--color-primary);
+    color: white;
+    border-radius: $radius-full;
+    padding: 0 $spacing-sm;
+    font-size: $font-size-xs;
+  }
+
+  &__cards {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-sm;
+  }
+}
+
+.kanban-card {
+  @include card;
+  padding: $spacing-md;
+
+  h4 {
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-xs;
+  }
+}
+
+.application-list {
+  display: grid;
+  gap: $spacing-md;
+}

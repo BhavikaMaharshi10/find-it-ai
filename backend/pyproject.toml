@@ -1,0 +1,14 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings.test"
+python_files = ["tests.py", "test_*.py", "*_tests.py"]
+addopts = "-v"
+
+[tool.black]
+line-length = 88
+target-version = ["py312"]
+exclude = "migrations|venv|.venv"
+
+[tool.isort]
+profile = "black"
+line_length = 88
+skip = ["migrations", "venv", ".venv"]

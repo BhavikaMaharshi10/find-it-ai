@@ -1,0 +1,103 @@
+@use '../../styles/abstracts' as *;
+
+.stat-card {
+  @include card;
+  padding: $spacing-lg;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__icon {
+    font-size: $font-size-xl;
+  }
+
+  &__label {
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    font-weight: $font-weight-medium;
+  }
+
+  &__value {
+    font-size: $font-size-3xl;
+    font-weight: $font-weight-bold;
+    color: var(--color-text);
+  }
+
+  &__trend {
+    font-size: $font-size-xs;
+    color: var(--color-success);
+    margin-top: $spacing-xs;
+  }
+}
+
+.dashboard-grid {
+  display: grid;
+  gap: $spacing-lg;
+  margin-bottom: $spacing-xl;
+
+  &--stats {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+
+  &--charts {
+    grid-template-columns: 1fr;
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+}
+
+.chart-card {
+  @include card;
+  padding: $spacing-lg;
+
+  h3 {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-sm;
+
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+  }
+
+  &__label {
+    width: 80px;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    text-align: right;
+  }
+
+  &__bar-wrap {
+    flex: 1;
+    height: 24px;
+    background: rgba($neutral-light, 0.2);
+    border-radius: $radius-full;
+    overflow: hidden;
+  }
+
+  &__bar {
+    height: 100%;
+    background: linear-gradient(90deg, $primary-dark, $neutral-medium);
+    border-radius: $radius-full;
+    transition: width $transition-slow;
+  }
+
+  &__value {
+    width: 30px;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+  }
+}

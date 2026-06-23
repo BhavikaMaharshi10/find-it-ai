@@ -1,0 +1,1 @@
+"""FindItAI Django configuration package."""

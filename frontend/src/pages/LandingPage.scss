@@ -1,0 +1,63 @@
+@use '../styles/abstracts' as *;
+
+.landing {
+  &__hero {
+    padding: $spacing-3xl 0;
+    text-align: center;
+
+    @include respond-to(md) {
+      padding: 6rem 0;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-3xl;
+    margin-bottom: $spacing-lg;
+    max-width: 800px;
+    margin-inline: auto;
+
+    @include respond-to(md) {
+      font-size: $font-size-4xl;
+    }
+
+    span {
+      color: var(--color-neutral);
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: var(--color-text-secondary);
+    max-width: 600px;
+    margin: 0 auto $spacing-2xl;
+    line-height: $line-height-relaxed;
+  }
+
+  &__cta {
+    display: flex;
+    gap: $spacing-md;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  &__features-grid {
+    display: grid;
+    gap: $spacing-lg;
+    margin-top: $spacing-2xl;
+
+    @include respond-to(md) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include respond-to(lg) {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  &__feature-card {
+    h3 {
+      font-size: $font-size-lg;
+      margin-bottom: $spacing-sm;
+    }
+  }
+}

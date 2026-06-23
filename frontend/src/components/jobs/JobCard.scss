@@ -1,0 +1,73 @@
+@use '../../styles/abstracts' as *;
+
+.job-card {
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__title {
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__company {
+    color: var(--color-text-secondary);
+    font-size: $font-size-sm;
+  }
+
+  &__score {
+    background: linear-gradient(135deg, $primary-dark, $neutral-medium);
+    color: white;
+    padding: $spacing-xs $spacing-md;
+    border-radius: $radius-full;
+    font-weight: $font-weight-bold;
+    font-size: $font-size-sm;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $spacing-md;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    margin-bottom: $spacing-md;
+  }
+
+  &__skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-md;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    justify-content: flex-end;
+  }
+}
+
+.job-filters {
+  @include card;
+  padding: $spacing-lg;
+  margin-bottom: $spacing-lg;
+  display: grid;
+  gap: $spacing-md;
+
+  @include respond-to(md) {
+    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    align-items: end;
+  }
+
+  label {
+    display: block;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+    margin-bottom: $spacing-xs;
+  }
+}
+
+.job-list {
+  display: grid;
+  gap: $spacing-md;
+}

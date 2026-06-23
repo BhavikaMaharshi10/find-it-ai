@@ -1,0 +1,29 @@
+@use '../abstracts' as *;
+
+.container {
+  width: 100%;
+  max-width: $max-content-width;
+  margin-inline: auto;
+  padding-inline: $spacing-md;
+
+  @include respond-to(lg) {
+    padding-inline: $spacing-xl;
+  }
+}
+
+.section {
+  padding-block: $spacing-3xl;
+}
+
+.grid {
+  display: grid;
+  gap: $spacing-lg;
+}
+
+.flex {
+  display: flex;
+  gap: $spacing-md;
+}
+
+.text-center { text-align: center; }
+.text-secondary { color: var(--color-text-secondary); }
