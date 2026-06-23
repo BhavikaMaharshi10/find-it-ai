@@ -1,0 +1,28 @@
+@use '../../styles/abstracts' as *;
+
+.ai-badge-component {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  background: rgba($accent-primary, 0.12);
+  color: $accent-glow;
+  border: 1px solid rgba($accent-primary, 0.25);
+  box-shadow: $glow-accent-sm;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  &__confidence {
+    padding-left: $spacing-xs;
+    margin-left: $spacing-xs;
+    border-left: 1px solid rgba($accent-primary, 0.3);
+    font-variant-numeric: tabular-nums;
+  }
+}

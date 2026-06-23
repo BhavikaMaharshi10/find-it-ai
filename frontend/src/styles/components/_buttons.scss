@@ -2,23 +2,29 @@
 
 .btn {
   @include button-base;
+  position: relative;
+  overflow: hidden;
 
   &--primary {
-    background: var(--color-primary);
-    color: var(--color-background);
+    background: $gradient-accent;
+    color: white;
+    box-shadow: $glow-accent-sm;
 
-    &:hover {
-      opacity: 0.9;
+    &:hover:not(:disabled) {
+      box-shadow: $glow-accent;
+      transform: translateY(-1px);
     }
   }
 
   &--secondary {
-    background: transparent;
-    color: var(--color-primary);
-    border: 1px solid var(--color-border);
+    background: rgba($surface, 0.8);
+    color: var(--color-text);
+    border: 1px solid var(--color-border-strong);
+    backdrop-filter: blur(8px);
 
-    &:hover {
-      background: var(--color-border);
+    &:hover:not(:disabled) {
+      border-color: rgba($accent-primary, 0.4);
+      background: rgba($accent-primary, 0.08);
     }
   }
 
@@ -26,15 +32,22 @@
     background: transparent;
     color: var(--color-text-secondary);
 
-    &:hover {
+    &:hover:not(:disabled) {
       color: var(--color-text);
-      background: rgba($neutral-light, 0.2);
+      background: rgba(255, 255, 255, 0.05);
     }
   }
 
   &--lg {
     padding: $spacing-md $spacing-xl;
     font-size: $font-size-base;
+    border-radius: $radius-xl;
+  }
+
+  &--sm {
+    padding: $spacing-xs $spacing-md;
+    font-size: $font-size-xs;
+    border-radius: $radius-md;
   }
 
   &:disabled {
@@ -44,7 +57,7 @@
 }
 
 .card {
-  @include card;
+  @include card-glow;
   padding: $spacing-lg;
 }
 
@@ -52,10 +65,10 @@
   width: 100%;
   padding: $spacing-sm $spacing-md;
   border: 1px solid var(--color-border);
-  border-radius: $radius-md;
-  background: var(--color-surface);
+  border-radius: $radius-lg;
+  background: rgba($surface, 0.5);
   color: var(--color-text);
-  transition: border-color $transition-fast;
+  transition: border-color $transition-fast, box-shadow $transition-fast;
   @include focus-ring;
 
   &::placeholder {
@@ -64,7 +77,8 @@
   }
 
   &:focus {
-    border-color: var(--color-primary);
+    border-color: rgba($accent-primary, 0.5);
+    box-shadow: 0 0 0 3px rgba($accent-primary, 0.1);
   }
 }
 
@@ -75,6 +89,39 @@
   border-radius: $radius-full;
   font-size: $font-size-xs;
   font-weight: $font-weight-medium;
-  background: rgba($neutral-light, 0.3);
-  color: var(--color-text-secondary);
+  background: rgba($accent-primary, 0.12);
+  color: $accent-glow;
+  border: 1px solid rgba($accent-primary, 0.2);
+}
+
+.badge--warning {
+  background: rgba($warning, 0.12);
+  color: $warning;
+  border-color: rgba($warning, 0.25);
+}
+
+.badge--success {
+  background: rgba($success, 0.12);
+  color: $success;
+  border-color: rgba($success, 0.25);
+}
+
+.ai-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $spacing-xs;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $radius-full;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba($accent-primary, 0.15);
+  color: $accent-glow;
+  border: 1px solid rgba($accent-primary, 0.3);
+  box-shadow: $glow-accent-sm;
+}
+
+.gradient-text {
+  @include gradient-text;
 }

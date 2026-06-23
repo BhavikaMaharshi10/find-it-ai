@@ -44,10 +44,18 @@ class RecommendationDetailView(APIView):
 class LearningRoadmapView(APIView):
     def get(self, request):
         resume = Resume.objects.filter(user=request.user, is_active=True).first()
-        skill_gaps = request.query_params.get("skills", "").split(",")
-        if not skill_gaps or skill_gaps == [""]:
-            rec = Recommendation.objects.filter(user=request.user).first()
-            skill_gaps = rec.missing_skills if rec else []
+        skills_param = request.query_params.get("skills", "").strip()
+        if skills_param:
+            skill_gaps = [s.strip() for s in skills_param.split(",") if s.strip()]
+        else:
+            skill_gaps = []
+            seen = set()
+            for rec in Recommendation.objects.filter(user=request.user):
+                for skill in rec.missing_skills or []:
+                    key = skill.lower().strip()
+                    if key and key not in seen:
+                        seen.add(key)
+                        skill_gaps.append(skill)
 
         service = LearningRecommendationService()
         roadmap = service.generate_learning_roadmap(

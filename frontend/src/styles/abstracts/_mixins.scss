@@ -24,23 +24,67 @@
   justify-content: space-between;
 }
 
-@mixin glassmorphism($opacity: 0.7) {
-  background: rgba($background, $opacity);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba($border-color, 0.5);
+@mixin glassmorphism($opacity: 0.6) {
+  background: rgba($surface, $opacity);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid $border-color;
+}
+
+@mixin glass-panel {
+  @include glassmorphism(0.5);
+  border-radius: $radius-2xl;
+  box-shadow: $shadow-md;
 }
 
 @mixin card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: $radius-xl;
-  box-shadow: $shadow-sm;
-  transition: box-shadow $transition-base;
+  background: rgba($surface, 0.6);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid $border-color;
+  border-radius: $radius-2xl;
+  transition: border-color $transition-base, box-shadow $transition-base, transform $transition-base;
 
   &:hover {
+    border-color: $border-color-strong;
     box-shadow: $shadow-md;
   }
+}
+
+@mixin card-glow {
+  @include card;
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    background: $gradient-accent;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity $transition-base;
+    filter: blur(12px);
+  }
+
+  &:hover::before {
+    opacity: 0.15;
+  }
+}
+
+@mixin accent-glow {
+  box-shadow: $glow-accent;
+}
+
+@mixin accent-glow-sm {
+  box-shadow: $glow-accent-sm;
+}
+
+@mixin gradient-text {
+  background: $gradient-accent;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 @mixin truncate {
@@ -51,7 +95,7 @@
 
 @mixin focus-ring {
   &:focus-visible {
-    outline: 2px solid var(--color-primary);
+    outline: 2px solid $accent-primary;
     outline-offset: 2px;
   }
 }
@@ -70,4 +114,10 @@
   transition: all $transition-fast;
   border: none;
   @include focus-ring;
+}
+
+@mixin floating-nav {
+  @include glassmorphism(0.7);
+  border-radius: $radius-2xl;
+  box-shadow: $shadow-lg;
 }

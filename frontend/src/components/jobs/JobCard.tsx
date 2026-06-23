@@ -1,5 +1,5 @@
-import { formatScore } from '../../utils/helpers';
-import Card from '../common/Card';
+import MatchScoreRing from '../common/MatchScoreRing';
+import Button from '../common/Button';
 import './JobCard.scss';
 
 interface JobCardProps {
@@ -28,37 +28,40 @@ export default function JobCard({
   isSaved,
 }: JobCardProps) {
   return (
-    <Card className="job-card">
+    <article className="job-card">
       <div className="job-card__header">
-        <div>
+        <div className="job-card__info">
           <h3 className="job-card__title">{title}</h3>
           <p className="job-card__company">{company}</p>
         </div>
         {matchScore !== undefined && (
-          <div className="job-card__score">{formatScore(matchScore)}</div>
+          <MatchScoreRing score={matchScore} size={56} showLabel={false} />
         )}
       </div>
+
       <div className="job-card__meta">
         <span>{isRemote ? 'Remote' : location}</span>
         {salaryRange && <span>{salaryRange}</span>}
       </div>
+
       <div className="job-card__skills">
         {skills.slice(0, 5).map((skill) => (
           <span key={skill} className="badge">{skill}</span>
         ))}
       </div>
+
       <div className="job-card__actions">
         {onSave && (
-          <button type="button" className="btn btn--ghost" onClick={onSave}>
+          <Button variant="secondary" size="sm" onClick={onSave}>
             {isSaved ? 'Saved' : 'Save'}
-          </button>
+          </Button>
         )}
         {onApply && (
-          <button type="button" className="btn btn--primary" onClick={onApply}>
-            Apply
-          </button>
+          <Button size="sm" onClick={onApply}>
+            Quick Apply
+          </Button>
         )}
       </div>
-    </Card>
+    </article>
   );
 }

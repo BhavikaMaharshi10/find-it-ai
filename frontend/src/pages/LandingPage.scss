@@ -1,36 +1,120 @@
 @use '../styles/abstracts' as *;
 
 .landing {
-  &__hero {
-    padding: $spacing-3xl 0;
-    text-align: center;
+  position: relative;
+  overflow: hidden;
 
-    @include respond-to(md) {
-      padding: 6rem 0;
+  &__orbs {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  &__orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: orb-float 20s ease-in-out infinite;
+
+    &--1 {
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba($accent-primary, 0.4) 0%, transparent 70%);
+      top: -10%;
+      right: -5%;
+    }
+
+    &--2 {
+      width: 400px;
+      height: 400px;
+      background: radial-gradient(circle, rgba($accent-secondary, 0.3) 0%, transparent 70%);
+      bottom: 20%;
+      left: -10%;
+      animation-delay: -7s;
+    }
+
+    &--3 {
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba($accent-glow, 0.25) 0%, transparent 70%);
+      top: 40%;
+      left: 40%;
+      animation-delay: -14s;
     }
   }
 
-  &__title {
-    font-size: $font-size-3xl;
-    margin-bottom: $spacing-lg;
-    max-width: 800px;
-    margin-inline: auto;
+  &__hero {
+    position: relative;
+    z-index: 1;
+    padding: $spacing-3xl 0;
 
     @include respond-to(md) {
-      font-size: $font-size-4xl;
+      padding: $spacing-4xl 0;
+    }
+  }
+
+  &__hero-grid {
+    display: grid;
+    gap: $spacing-3xl;
+    align-items: center;
+
+    @include respond-to(lg) {
+      grid-template-columns: 1fr 1fr;
+      gap: $spacing-2xl;
+    }
+  }
+
+  &__hero-content {
+    text-align: center;
+
+    @include respond-to(lg) {
+      text-align: left;
+    }
+  }
+
+  &__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-xs $spacing-md;
+    margin-bottom: $spacing-lg;
+    border-radius: $radius-full;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    color: $accent-glow;
+    background: rgba($accent-primary, 0.1);
+    border: 1px solid rgba($accent-primary, 0.2);
+  }
+
+  &__title {
+    font-size: $font-size-4xl;
+    font-weight: $font-weight-bold;
+    margin-bottom: $spacing-lg;
+    line-height: $line-height-tight;
+    letter-spacing: -0.03em;
+
+    @include respond-to(md) {
+      font-size: $font-size-5xl;
     }
 
-    span {
-      color: var(--color-neutral);
+    @include respond-to(lg) {
+      font-size: $font-size-6xl;
     }
   }
 
   &__subtitle {
     font-size: $font-size-lg;
     color: var(--color-text-secondary);
-    max-width: 600px;
+    max-width: 520px;
     margin: 0 auto $spacing-2xl;
     line-height: $line-height-relaxed;
+
+    @include respond-to(lg) {
+      margin-inline: 0;
+      font-size: $font-size-xl;
+    }
   }
 
   &__cta {
@@ -38,12 +122,60 @@
     gap: $spacing-md;
     justify-content: center;
     flex-wrap: wrap;
+    margin-bottom: $spacing-xl;
+
+    @include respond-to(lg) {
+      justify-content: flex-start;
+    }
+  }
+
+  &__trust {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+
+    @include respond-to(lg) {
+      justify-content: flex-start;
+    }
+  }
+
+  &__trust-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: rgba($accent-primary, 0.5);
+  }
+
+  &__hero-visual {
+    display: flex;
+    justify-content: center;
+    perspective: 1200px;
+
+    @include respond-to(lg) {
+      justify-content: flex-end;
+    }
+  }
+
+  &__features-header {
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto $spacing-3xl;
+
+    .ai-badge {
+      margin-bottom: $spacing-md;
+    }
+
+    h2 {
+      margin-bottom: $spacing-md;
+    }
   }
 
   &__features-grid {
     display: grid;
     gap: $spacing-lg;
-    margin-top: $spacing-2xl;
 
     @include respond-to(md) {
       grid-template-columns: repeat(2, 1fr);
@@ -55,9 +187,63 @@
   }
 
   &__feature-card {
+    @include glass-panel;
+    padding: $spacing-xl;
+    transition: border-color $transition-base, box-shadow $transition-base;
+
+    &:hover {
+      border-color: rgba($accent-primary, 0.3);
+      box-shadow: $shadow-md, $glow-accent-sm;
+    }
+
     h3 {
       font-size: $font-size-lg;
       margin-bottom: $spacing-sm;
     }
+
+    p {
+      font-size: $font-size-sm;
+      line-height: $line-height-relaxed;
+    }
   }
+
+  &__feature-icon {
+    @include flex-center;
+    width: 44px;
+    height: 44px;
+    border-radius: $radius-lg;
+    margin-bottom: $spacing-md;
+    background: rgba($accent-primary, 0.12);
+    color: $accent-glow;
+    border: 1px solid rgba($accent-primary, 0.2);
+  }
+
+  &__cta-section {
+    position: relative;
+    z-index: 1;
+    padding: $spacing-3xl 0 $spacing-4xl;
+  }
+
+  &__cta-card {
+    @include glass-panel;
+    text-align: center;
+    padding: $spacing-3xl;
+    box-shadow: $shadow-lg, $glow-accent;
+
+    h2 {
+      margin-bottom: $spacing-md;
+    }
+
+    p {
+      margin-bottom: $spacing-xl;
+      max-width: 480px;
+      margin-inline: auto;
+    }
+  }
+}
+
+@keyframes orb-float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
 }
