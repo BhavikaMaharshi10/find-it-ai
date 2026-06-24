@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
+from core.mixins import RateLimitMixin
 from .constants import SECURITY_QUESTION
 from .serializers import (
     ChangePasswordSerializer,
@@ -18,7 +19,11 @@ from .tokens import CustomTokenObtainPairSerializer
 User = get_user_model()
 
 
-class RegisterView(generics.CreateAPIView):
+class RegisterView(RateLimitMixin, generics.CreateAPIView):
+    ratelimit_group = "auth_register"
+    ratelimit_rate = "10/m"
+    ratelimit_key = "ip"
+
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
@@ -37,7 +42,11 @@ class RegisterView(generics.CreateAPIView):
         )
 
 
-class LoginView(TokenObtainPairView):
+class LoginView(RateLimitMixin, TokenObtainPairView):
+    ratelimit_group = "auth_login"
+    ratelimit_rate = "20/m"
+    ratelimit_key = "ip"
+
     permission_classes = [permissions.AllowAny]
     serializer_class = CustomTokenObtainPairSerializer
 
@@ -76,8 +85,12 @@ class ChangePasswordView(APIView):
         return Response({"message": "Password changed successfully."})
 
 
-class SecurityQuestionView(APIView):
+class SecurityQuestionView(RateLimitMixin, APIView):
     """Return the security question for a registered email."""
+
+    ratelimit_group = "auth_security_question"
+    ratelimit_rate = "20/m"
+    ratelimit_key = "ip"
 
     permission_classes = [permissions.AllowAny]
 
@@ -87,8 +100,12 @@ class SecurityQuestionView(APIView):
         return Response({"security_question": SECURITY_QUESTION})
 
 
-class ResetPasswordView(APIView):
+class ResetPasswordView(RateLimitMixin, APIView):
     """Reset password using security question answer."""
+
+    ratelimit_group = "auth_reset_password"
+    ratelimit_rate = "10/m"
+    ratelimit_key = "ip"
 
     permission_classes = [permissions.AllowAny]
 

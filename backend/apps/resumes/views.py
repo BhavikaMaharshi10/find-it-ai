@@ -3,6 +3,7 @@ from rest_framework.parsers import FormParser, MultiPartParser
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.mixins import RateLimitMixin
 from services.resume_analysis import ResumeAnalysisService
 
 from .models import Resume
@@ -16,7 +17,10 @@ class ResumeListView(generics.ListAPIView):
         return Resume.objects.filter(user=self.request.user)
 
 
-class ResumeUploadView(generics.CreateAPIView):
+class ResumeUploadView(RateLimitMixin, generics.CreateAPIView):
+    ratelimit_group = "resume_upload"
+    ratelimit_rate = "10/h"
+
     serializer_class = ResumeUploadSerializer
     parser_classes = [MultiPartParser, FormParser]
 

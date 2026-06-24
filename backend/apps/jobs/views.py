@@ -3,14 +3,18 @@ from rest_framework import filters, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.mixins import RateLimitMixin
 from services.job_ingestion import JobIngestionService
 
 from .models import Job, SavedJob
 from .serializers import JobSerializer, LiveJobSearchSerializer, SavedJobSerializer
 
 
-class JobLiveSearchView(APIView):
+class JobLiveSearchView(RateLimitMixin, APIView):
     """Search live job postings from external APIs (not stored in DB)."""
+
+    ratelimit_group = "jobs_live_search"
+    ratelimit_rate = "30/h"
 
     def get(self, request):
         search = request.query_params.get("search", "").strip()

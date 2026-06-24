@@ -132,6 +132,16 @@ if _database_url:
             DATABASES["default"]["OPTIONS"]["sslmode"] = "require"
 
 # ---------------------------------------------------------------------------
+# Cache (used by django-ratelimit)
+# ---------------------------------------------------------------------------
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "finditai-cache",
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Auth
 # ---------------------------------------------------------------------------
 AUTH_USER_MODEL = "accounts.User"

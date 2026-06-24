@@ -3,8 +3,9 @@ services:
     name: finditai-api
     runtime: python
     rootDir: backend
-    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput
-    startCommand: gunicorn config.wsgi:application --bind 0.0.0.0:$PORT
+    healthCheckPath: /api/v1/health/
+    buildCommand: pip install -r requirements.txt && python manage.py collectstatic --noinput && python manage.py migrate --noinput
+    startCommand: gunicorn config.wsgi:application -c gunicorn.conf.py
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: config.settings.production
@@ -14,11 +15,13 @@ services:
         generateValue: true
       - key: DEBUG
         value: "False"
+      - key: ALLOWED_HOSTS
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: CORS_ALLOWED_ORIGINS
         sync: false
-      - key: FRONTEND_URL
-        sync: false
+      - key: GUNICORN_TIMEOUT
+        value: "180"
