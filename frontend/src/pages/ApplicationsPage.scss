@@ -59,6 +59,11 @@
 .kanban-card {
   @include card;
   padding: $spacing-md;
+  transition: opacity $transition-base;
+
+  &--updating {
+    opacity: 0.7;
+  }
 
   h4 {
     font-size: $font-size-sm;

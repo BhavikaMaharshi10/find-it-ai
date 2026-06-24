@@ -14,7 +14,7 @@ class ApplicationListCreateView(generics.ListCreateAPIView):
         return Application.objects.filter(user=self.request.user).select_related("job")
 
     def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
+        serializer.save()
 
 
 class ApplicationDetailView(generics.RetrieveUpdateDestroyAPIView):

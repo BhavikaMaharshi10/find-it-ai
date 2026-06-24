@@ -19,28 +19,39 @@ class JobSerializer(serializers.ModelSerializer):
             "preferred_skills",
             "salary_range",
             "employment_type",
+            "source",
+            "external_id",
             "source_url",
             "posted_at",
             "created_at",
         )
 
 
+class LiveJobSearchSerializer(serializers.Serializer):
+    external_key = serializers.CharField()
+    source = serializers.CharField()
+    external_id = serializers.CharField()
+    title = serializers.CharField()
+    company = serializers.CharField()
+    description = serializers.CharField()
+    location = serializers.CharField()
+    is_remote = serializers.BooleanField()
+    experience_level = serializers.CharField()
+    required_skills = serializers.ListField(child=serializers.CharField())
+    salary_range = serializers.CharField()
+    employment_type = serializers.CharField()
+    source_url = serializers.URLField(allow_blank=True)
+    posted_at = serializers.DateTimeField(allow_null=True)
+
+
 class SavedJobSerializer(serializers.ModelSerializer):
     job = JobSerializer(read_only=True)
-    job_id = serializers.UUIDField(write_only=True)
+    job_id = serializers.UUIDField(write_only=True, required=False)
 
     class Meta:
         model = SavedJob
         fields = ("id", "job", "job_id", "notes", "saved_at")
         read_only_fields = ("id", "saved_at")
-
-    def create(self, validated_data):
-        job_id = validated_data.pop("job_id")
-        return SavedJob.objects.get_or_create(
-            user=self.context["request"].user,
-            job_id=job_id,
-            defaults={"notes": validated_data.get("notes", "")},
-        )[0]
 
 
 class JobFilter(django_filters.FilterSet):

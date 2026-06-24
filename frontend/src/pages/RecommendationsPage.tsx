@@ -1,11 +1,15 @@
-import { useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMemo, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { motion } from 'framer-motion';
-import { recommendationsApi } from '../api/endpoints';
+import { isAxiosError } from 'axios';
+import { recommendationsApi, savedJobsApi } from '../api/endpoints';
+import QuickApplyModal from '../components/applications/QuickApplyModal';
 import Button from '../components/common/Button';
 import AIBadge from '../components/common/AIBadge';
 import RecommendationCard from '../components/recommendations/RecommendationCard';
+import type { Job, Recommendation } from '../types';
 import '../components/recommendations/RecommendationCard.scss';
+import '../components/dashboard/DashboardCharts.scss';
 
 function collectSkillGaps(recommendations: { missing_skills: string[] }[] | undefined) {
   if (!recommendations?.length) return [];
@@ -26,14 +30,39 @@ function collectSkillGaps(recommendations: { missing_skills: string[] }[] | unde
 
 export default function RecommendationsPage() {
   const queryClient = useQueryClient();
+  const [applyJob, setApplyJob] = useState<Job | null>(null);
+  const [generateError, setGenerateError] = useState<string | null>(null);
 
-  const { data: recommendations, isLoading, refetch } = useQuery({
-    queryKey: ['recommendations'],
-    queryFn: () => recommendationsApi.list(10).then((r) => r.data),
+  const generateMutation = useMutation({
+    mutationFn: () => recommendationsApi.generate(10).then((r) => r.data),
+    onMutate: () => setGenerateError(null),
+    onError: (error) => {
+      if (isAxiosError(error) && error.code === 'ERR_CANCELED') {
+        return;
+      }
+      const message = isAxiosError(error)
+        ? (error.response?.data as { detail?: string } | undefined)?.detail ??
+          error.message
+        : 'Could not generate matches. Please try again.';
+      setGenerateError(message);
+    },
   });
+
+  const recommendations: Recommendation[] | undefined = generateMutation.data;
+  const hasGenerated =
+    generateMutation.isPending || generateMutation.isSuccess || generateMutation.isError;
 
   const skillGaps = useMemo(() => collectSkillGaps(recommendations), [recommendations]);
   const skillGapsKey = skillGaps.join(',');
+
+  const { data: savedJobs } = useQuery({
+    queryKey: ['saved-jobs'],
+    queryFn: () => savedJobsApi.list(),
+  });
+
+  const savedKeys = new Set(
+    savedJobs?.map((s) => `${s.job.source ?? 'seed'}:${s.job.external_id ?? s.job.id}`) ?? [],
+  );
 
   const {
     data: roadmap,
@@ -46,10 +75,20 @@ export default function RecommendationsPage() {
     enabled: skillGaps.length > 0,
   });
 
-  const handleGenerate = async () => {
-    await recommendationsApi.generate(10);
-    await refetch();
-    await queryClient.invalidateQueries({ queryKey: ['learning-roadmap'] });
+  const handleGenerate = () => {
+    generateMutation.mutate();
+  };
+
+  const handleSave = async (job: Job) => {
+    await savedJobsApi.save(job);
+    queryClient.invalidateQueries({ queryKey: ['saved-jobs'] });
+  };
+
+  const handleQuickApply = (job: Job) => {
+    if (job.source_url) {
+      window.open(job.source_url, '_blank', 'noopener,noreferrer');
+    }
+    setApplyJob(job);
   };
 
   const hasRoadmap = roadmap && roadmap.roadmap && roadmap.roadmap.length > 0;
@@ -58,30 +97,52 @@ export default function RecommendationsPage() {
     <div className="recommendations-page">
       <div className="recommendations-page__header">
         <div className="recommendations-page__title-group">
-          <AIBadge label="RAG Powered" />
+          <AIBadge label="Live AI Matching" />
           <h1>AI Recommendations</h1>
-          <p className="text-secondary">Personalized job matches with explainable intelligence</p>
+          <p className="text-secondary">
+            Matches your resume against live openings from Remotive, Lever, and Greenhouse
+          </p>
         </div>
-        <Button onClick={handleGenerate}>Generate Matches</Button>
+        <Button onClick={handleGenerate} loading={generateMutation.isPending}>
+          Generate Matches
+        </Button>
       </div>
 
-      {isLoading ? (
+      {!hasGenerated ? (
+        <div className="recommendations-page__empty">
+          <AIBadge label="Get Started" />
+          <p>
+            Upload your resume and click &quot;Generate Matches&quot; to rank live job openings
+            against your profile.
+          </p>
+        </div>
+      ) : generateMutation.isPending ? (
         <div className="dashboard-loading">
           <div className="dashboard-loading__spinner" />
-          <span>Analyzing your profile...</span>
+          <span>Fetching live jobs and analyzing your resume…</span>
         </div>
+      ) : generateMutation.isError && !recommendations?.length ? (
+        <p className="text-secondary" style={{ color: 'var(--color-error)' }}>
+          {generateError ?? 'Failed to generate matches. Check that the backend is running.'}
+        </p>
       ) : recommendations && recommendations.length > 0 ? (
         <div className="recommendations-page__list">
           {recommendations.map((rec, i) => (
-            <RecommendationCard key={rec.id} recommendation={rec} index={i} />
+            <RecommendationCard
+              key={rec.id}
+              recommendation={rec}
+              index={i}
+              isSaved={savedKeys.has(`${rec.job.source}:${rec.job.external_id}`)}
+              onSave={() => handleSave(rec.job)}
+              onApply={() => handleQuickApply(rec.job)}
+            />
           ))}
         </div>
       ) : (
         <div className="recommendations-page__empty">
-          <AIBadge label="Get Started" />
           <p>
-            Upload your resume and click &quot;Generate Matches&quot; to get AI-powered
-            recommendations tailored to your skills and goals.
+            No strong matches found in the current live job pool. Try again later or broaden your
+            resume skills.
           </p>
         </div>
       )}
@@ -130,6 +191,8 @@ export default function RecommendationsPage() {
           )}
         </motion.div>
       )}
+
+      <QuickApplyModal job={applyJob} onClose={() => setApplyJob(null)} />
     </div>
   );
 }

@@ -22,9 +22,9 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-/** Prevents unhandled rejections after redirecting to login. */
+/** Ends the request chain without an unhandled rejection after redirect. */
 function haltRequest() {
-  return new Promise<never>(() => {});
+  return Promise.reject(new axios.CanceledError('Session expired'));
 }
 
 api.interceptors.response.use(

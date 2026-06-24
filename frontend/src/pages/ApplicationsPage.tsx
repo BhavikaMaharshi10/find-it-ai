@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { applicationsApi } from '../api/endpoints';
 import Card from '../components/common/Card';
@@ -24,13 +24,42 @@ export default function ApplicationsPage() {
     queryFn: () => applicationsApi.list(),
   });
 
-  const handleStatusChange = async (id: string, status: ApplicationStatus) => {
-    await applicationsApi.update(id, { status });
-    queryClient.invalidateQueries({ queryKey: ['applications'] });
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ApplicationStatus }) =>
+      applicationsApi.update(id, { status }).then((r) => r.data),
+    onMutate: async ({ id, status }) => {
+      await queryClient.cancelQueries({ queryKey: ['applications'] });
+      const previous = queryClient.getQueryData<Application[]>(['applications']);
+      queryClient.setQueryData<Application[]>(['applications'], (old) =>
+        old?.map((app) => (app.id === id ? { ...app, status } : app)) ?? [],
+      );
+      return { previous };
+    },
+    onError: (_error, _variables, context) => {
+      if (context?.previous) {
+        queryClient.setQueryData(['applications'], context.previous);
+      }
+    },
+    onSuccess: (updated) => {
+      queryClient.setQueryData<Application[]>(['applications'], (old) =>
+        old?.map((app) => (app.id === updated.id ? updated : app)) ?? [updated],
+      );
+    },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard'] });
+    },
+  });
+
+  const handleStatusChange = (id: string, status: ApplicationStatus) => {
+    updateStatusMutation.mutate({ id, status });
   };
 
   const getByStatus = (status: ApplicationStatus) =>
     applications?.filter((a) => a.status === status) ?? [];
+
+  const updatingId = updateStatusMutation.isPending
+    ? updateStatusMutation.variables?.id
+    : undefined;
 
   return (
     <div>
@@ -73,6 +102,7 @@ export default function ApplicationsPage() {
                     key={app.id}
                     application={app}
                     onStatusChange={handleStatusChange}
+                    isUpdating={updatingId === app.id}
                   />
                 ))}
               </div>
@@ -92,6 +122,7 @@ export default function ApplicationsPage() {
                   className="input"
                   value={app.status}
                   onChange={(e) => handleStatusChange(app.id, e.target.value as ApplicationStatus)}
+                  disabled={updatingId === app.id}
                   style={{ width: 'auto' }}
                 >
                   {APPLICATION_STATUSES.map((s) => (
@@ -111,18 +142,21 @@ export default function ApplicationsPage() {
 function ApplicationCard({
   application,
   onStatusChange,
+  isUpdating,
 }: {
   application: Application;
   onStatusChange: (id: string, status: ApplicationStatus) => void;
+  isUpdating?: boolean;
 }) {
   return (
-    <div className="kanban-card">
+    <div className={`kanban-card${isUpdating ? ' kanban-card--updating' : ''}`}>
       <h4>{application.job.title}</h4>
       <p className="text-secondary">{application.job.company}</p>
       <select
         className="input"
         value={application.status}
         onChange={(e) => onStatusChange(application.id, e.target.value as ApplicationStatus)}
+        disabled={isUpdating}
         style={{ marginTop: '0.5rem', fontSize: '0.75rem' }}
       >
         {APPLICATION_STATUSES.map((s) => (

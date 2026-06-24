@@ -91,7 +91,10 @@ export interface Certification {
 }
 
 export interface Job {
-  id: string;
+  id?: string;
+  external_key?: string;
+  external_id?: string;
+  source?: string;
   title: string;
   company: string;
   description: string;
@@ -99,11 +102,17 @@ export interface Job {
   is_remote: boolean;
   experience_level: ExperienceLevel;
   required_skills: string[];
-  preferred_skills: string[];
+  preferred_skills?: string[];
   salary_range: string;
   employment_type: string;
   source_url: string;
-  posted_at: string;
+  posted_at: string | null;
+}
+
+export interface LiveJobSearchResponse {
+  count: number;
+  results: Job[];
+  cached: boolean;
 }
 
 export type ExperienceLevel = 'junior' | 'mid' | 'senior' | 'lead';

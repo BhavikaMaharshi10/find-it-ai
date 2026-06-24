@@ -61,7 +61,7 @@
   gap: $spacing-md;
 
   @include respond-to(md) {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr auto;
     align-items: end;
   }
 
@@ -70,6 +70,16 @@
     font-size: $font-size-sm;
     color: var(--color-text-secondary);
     margin-bottom: $spacing-xs;
+  }
+
+  &__apply {
+    display: flex;
+    align-items: flex-end;
+
+    .btn {
+      width: 100%;
+      min-width: 120px;
+    }
   }
 }
 

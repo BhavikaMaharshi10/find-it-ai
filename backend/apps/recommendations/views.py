@@ -13,19 +13,16 @@ from .serializers import RecommendationDetailSerializer, RecommendationSerialize
 
 class RecommendationListView(APIView):
     def get(self, request):
-        service = RecommendationService()
-        top_k = int(request.query_params.get("top_k", 10))
-        results = service.find_similar_jobs(request.user, top_k=top_k)
-        stored = Recommendation.objects.filter(user=request.user).select_related("job")[:top_k]
-        return Response(RecommendationSerializer(stored, many=True).data)
+        # Recommendations are generated on demand from live job APIs.
+        return Response([])
 
     def post(self, request):
-        """Trigger fresh recommendation generation."""
+        """Generate matches from live job postings."""
         service = RecommendationService()
         top_k = int(request.data.get("top_k", 10))
-        service.find_similar_jobs(request.user, top_k=top_k)
-        stored = Recommendation.objects.filter(user=request.user).select_related("job")[:top_k]
-        return Response(RecommendationSerializer(stored, many=True).data)
+        refresh = request.data.get("refresh", False) in (True, "true", "1", 1)
+        results = service.find_live_matches(request.user, top_k=top_k, refresh=refresh)
+        return Response(results)
 
 
 class RecommendationDetailView(APIView):
