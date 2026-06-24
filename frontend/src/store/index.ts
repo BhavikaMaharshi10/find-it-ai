@@ -37,6 +37,15 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        const hasTokens = Boolean(
+          localStorage.getItem(TOKEN_KEY) && localStorage.getItem(REFRESH_KEY),
+        );
+        if (state.isAuthenticated && !hasTokens) {
+          state.clearAuth();
+        }
+      },
     },
   ),
 );
