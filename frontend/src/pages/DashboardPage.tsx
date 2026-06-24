@@ -1,6 +1,13 @@
 import { BarChart } from '../components/dashboard/BarChart';
 import StatCard from '../components/dashboard/StatCard';
 import Button from '../components/common/Button';
+import AIBadge from '../components/common/AIBadge';
+import {
+  IconSearch,
+  IconBookmark,
+  IconClipboard,
+  IconSparkles,
+} from '../components/common/Icons';
 import {
   useApplicationStatus,
   useApplicationTrends,
@@ -9,7 +16,6 @@ import {
   useRefreshRecommendations,
   useSkillGaps,
 } from '../hooks/useDashboard';
-import { formatScore } from '../utils/helpers';
 import '../components/dashboard/DashboardCharts.scss';
 
 export default function DashboardPage() {
@@ -20,14 +26,22 @@ export default function DashboardPage() {
   const { data: appStatus } = useApplicationStatus();
   const refreshRecs = useRefreshRecommendations();
 
-  if (isLoading) return <p>Loading dashboard...</p>;
+  if (isLoading) {
+    return (
+      <div className="dashboard-loading">
+        <div className="dashboard-loading__spinner" />
+        <span>Loading dashboard...</span>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-        <div>
+    <div className="dashboard-page">
+      <div className="dashboard-page__header">
+        <div className="dashboard-page__title-group">
+          <AIBadge label="Overview" />
           <h1>Dashboard</h1>
-          <p className="text-secondary">Your job search overview</p>
+          <p className="text-secondary">Your job search intelligence at a glance</p>
         </div>
         <Button onClick={() => refreshRecs.mutate()} loading={refreshRecs.isPending}>
           Refresh Recommendations
@@ -35,10 +49,31 @@ export default function DashboardPage() {
       </div>
 
       <div className="dashboard-grid dashboard-grid--stats">
-        <StatCard label="Jobs Found" value={stats?.jobs_found ?? 0} icon="🔍" />
-        <StatCard label="Saved Jobs" value={stats?.saved_jobs ?? 0} icon="🔖" />
-        <StatCard label="Applications" value={stats?.applications_sent ?? 0} icon="📋" />
-        <StatCard label="Avg Match Score" value={formatScore(stats?.average_match_score ?? 0)} icon="✨" />
+        <StatCard
+          label="Jobs Found"
+          value={stats?.jobs_found ?? 0}
+          numericValue={stats?.jobs_found ?? 0}
+          icon={<IconSearch size={18} />}
+        />
+        <StatCard
+          label="Saved Jobs"
+          value={stats?.saved_jobs ?? 0}
+          numericValue={stats?.saved_jobs ?? 0}
+          icon={<IconBookmark size={18} />}
+        />
+        <StatCard
+          label="Applications"
+          value={stats?.applications_sent ?? 0}
+          numericValue={stats?.applications_sent ?? 0}
+          icon={<IconClipboard size={18} />}
+        />
+        <StatCard
+          label="Avg Match Score"
+          value={`${Math.round(stats?.average_match_score ?? 0)}%`}
+          numericValue={stats?.average_match_score ?? 0}
+          suffix="%"
+          icon={<IconSparkles size={18} />}
+        />
       </div>
 
       <div className="dashboard-grid dashboard-grid--charts">

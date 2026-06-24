@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { authApi } from '../api/endpoints';
 import { useAuthStore } from '../store';
+import { hasAuthTokens } from '../api/authSession';
 import type { LoginCredentials, RegisterData } from '../types';
 import { ROUTES } from '../utils/constants';
 
@@ -52,6 +53,7 @@ export function useCurrentUser() {
   return useQuery({
     queryKey: ['user', 'me'],
     queryFn: () => authApi.getMe().then((r) => r.data),
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && hasAuthTokens(),
+    retry: false,
   });
 }

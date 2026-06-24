@@ -3,23 +3,33 @@
 .dashboard-layout {
   display: flex;
   min-height: 100vh;
+  background: var(--color-background);
 
   &__sidebar {
     width: $sidebar-width;
-    background: var(--color-surface);
-    border-right: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    transition: width $transition-base;
     position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
+    top: $spacing-md;
+    left: $spacing-md;
+    bottom: $spacing-md;
     z-index: $z-sticky;
+    transition: transform $transition-base, opacity $transition-base;
+
+    @include respond-to(lg) {
+      left: $spacing-lg;
+    }
   }
 
   &--collapsed &__sidebar {
-    width: 0;
+    transform: translateX(calc(-100% - #{$spacing-md}));
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  &__sidebar-inner {
+    @include floating-nav;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
   }
 
@@ -29,11 +39,13 @@
   }
 
   &__logo {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
     font-size: $font-size-lg;
     font-weight: $font-weight-bold;
+    font-family: var(--font-display);
     color: var(--color-text);
-
-    span { color: var(--color-neutral); }
   }
 
   &__nav {
@@ -41,7 +53,8 @@
     padding: $spacing-md;
     display: flex;
     flex-direction: column;
-    gap: $spacing-xs;
+    gap: 2px;
+    overflow-y: auto;
   }
 
   &__nav-item {
@@ -49,36 +62,56 @@
     align-items: center;
     gap: $spacing-sm;
     padding: $spacing-sm $spacing-md;
-    border-radius: $radius-md;
+    border-radius: $radius-lg;
     color: var(--color-text-secondary);
     text-decoration: none;
     font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
     transition: all $transition-fast;
 
+    svg {
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+
     &:hover {
-      background: rgba($neutral-light, 0.15);
+      background: rgba(255, 255, 255, 0.05);
       color: var(--color-text);
+
+      svg { opacity: 1; }
     }
 
     &--active {
-      background: rgba($primary-dark, 0.08);
-      color: var(--color-primary);
-      font-weight: $font-weight-medium;
+      background: rgba($accent-primary, 0.12);
+      color: $accent-glow;
+      border: 1px solid rgba($accent-primary, 0.2);
+
+      svg {
+        opacity: 1;
+        color: $accent-glow;
+      }
     }
   }
 
   &__sidebar-footer {
     padding: $spacing-md;
     border-top: 1px solid var(--color-border);
-    display: flex;
-    flex-direction: column;
-    gap: $spacing-sm;
+  }
+
+  &__logout {
+    width: 100%;
+    justify-content: flex-start;
   }
 
   &__content {
     flex: 1;
-    margin-left: $sidebar-width;
+    margin-left: calc(#{$sidebar-width} + #{$spacing-md} * 2);
     transition: margin-left $transition-base;
+    min-width: 0;
+
+    @include respond-to(lg) {
+      margin-left: calc(#{$sidebar-width} + #{$spacing-lg} + #{$spacing-md});
+    }
   }
 
   &--collapsed &__content {
@@ -89,24 +122,49 @@
     @include flex-between;
     height: $header-height;
     padding: 0 $spacing-xl;
-    @include glassmorphism(0.85);
-    border-bottom: 1px solid var(--color-border);
+    margin: $spacing-md $spacing-md 0;
+    @include floating-nav;
     position: sticky;
-    top: 0;
+    top: $spacing-md;
     z-index: $z-sticky - 1;
   }
 
   &__menu-btn {
     background: none;
     border: none;
-    font-size: $font-size-xl;
+    color: var(--color-text);
     cursor: pointer;
     padding: $spacing-sm;
     border-radius: $radius-md;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.05);
+    }
 
     @include respond-to(lg) {
       display: none;
     }
+  }
+
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+  }
+
+  &__avatar {
+    @include flex-center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-full;
+    background: $gradient-accent;
+    color: white;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-bold;
   }
 
   &__main {

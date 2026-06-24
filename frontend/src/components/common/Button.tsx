@@ -23,7 +23,13 @@ export default function Button({
     <motion.button
       type={type}
       whileTap={{ scale: 0.98 }}
-      className={classNames('btn', `btn--${variant}`, size === 'lg' && 'btn--lg', className)}
+      className={classNames(
+        'btn',
+        `btn--${variant}`,
+        size === 'lg' && 'btn--lg',
+        size === 'sm' && 'btn--sm',
+        className,
+      )}
       disabled={disabled || loading}
       {...(props as object)}
     >

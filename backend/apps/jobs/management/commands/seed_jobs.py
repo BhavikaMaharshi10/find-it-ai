@@ -108,7 +108,8 @@ class Command(BaseCommand):
             job, created = Job.objects.get_or_create(
                 title=job_data["title"],
                 company=job_data["company"],
-                defaults={**job_data, "posted_at": timezone.now()},
+                source="seed",
+                defaults={**job_data, "source": "seed", "posted_at": timezone.now()},
             )
             if created:
                 created_count += 1

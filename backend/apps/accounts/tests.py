@@ -100,8 +100,12 @@ class TestAuthAPI:
 
 @pytest.mark.django_db
 class TestJobsAPI:
-    def test_list_jobs_empty(self, auth_client):
-        response = auth_client.get("/api/v1/jobs/")
+    def test_live_search_empty(self, auth_client, monkeypatch):
+        monkeypatch.setattr(
+            "services.job_ingestion.JobIngestionService.search_live",
+            lambda self, **kw: {"count": 0, "results": [], "cached": False},
+        )
+        response = auth_client.get("/api/v1/jobs/?search=developer")
         assert response.status_code == status.HTTP_200_OK
         assert response.data["results"] == []
 

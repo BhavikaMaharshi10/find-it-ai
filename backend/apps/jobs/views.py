@@ -3,20 +3,35 @@ from rest_framework import filters, generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from services.job_ingestion import JobIngestionService
+
 from .models import Job, SavedJob
-from .serializers import JobFilter, JobSerializer, SavedJobSerializer
+from .serializers import JobSerializer, LiveJobSearchSerializer, SavedJobSerializer
 
 
-class JobListView(generics.ListAPIView):
-    serializer_class = JobSerializer
-    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_class = JobFilter
-    search_fields = ["title", "company", "description", "location"]
-    ordering_fields = ["posted_at", "created_at", "title", "company"]
-    ordering = ["-posted_at"]
+class JobLiveSearchView(APIView):
+    """Search live job postings from external APIs (not stored in DB)."""
 
-    def get_queryset(self):
-        return Job.objects.filter(is_active=True)
+    def get(self, request):
+        search = request.query_params.get("search", "").strip()
+        is_remote_param = request.query_params.get("is_remote", "")
+        experience = request.query_params.get("experience_level", "").strip() or None
+        refresh = request.query_params.get("refresh", "").lower() in ("1", "true", "yes")
+
+        is_remote = None
+        if is_remote_param.lower() == "true":
+            is_remote = True
+        elif is_remote_param.lower() == "false":
+            is_remote = False
+
+        service = JobIngestionService()
+        payload = service.search_live(
+            search=search,
+            is_remote=is_remote,
+            experience_level=experience,
+            refresh=refresh,
+        )
+        return Response(payload)
 
 
 class JobDetailView(generics.RetrieveAPIView):
@@ -31,7 +46,19 @@ class SavedJobListCreateView(generics.ListCreateAPIView):
         return SavedJob.objects.filter(user=self.request.user).select_related("job")
 
     def create(self, request, *args, **kwargs):
+        job_payload = request.data.get("job")
         job_id = request.data.get("job_id")
+
+        if job_payload and not job_id:
+            job = JobIngestionService().persist_job(job_payload)
+            job_id = str(job.id)
+
+        if not job_id:
+            return Response(
+                {"detail": "job_id or job payload is required."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         saved, created = SavedJob.objects.get_or_create(
             user=request.user,
             job_id=job_id,
@@ -40,6 +67,7 @@ class SavedJobListCreateView(generics.ListCreateAPIView):
         if not created and request.data.get("notes"):
             saved.notes = request.data["notes"]
             saved.save()
+
         return Response(
             SavedJobSerializer(saved).data,
             status=status.HTTP_201_CREATED if created else status.HTTP_200_OK,

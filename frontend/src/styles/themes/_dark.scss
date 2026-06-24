@@ -1,9 +1,3 @@
 @use '../abstracts' as *;
 
-[data-theme='dark'] {
-  color-scheme: dark;
-}
-
-[data-theme='light'] {
-  color-scheme: light;
-}
+// Dark mode only — color-scheme set on :root in _reset.scss

@@ -4,6 +4,7 @@ import type {
   AuthTokens,
   DashboardStats,
   Job,
+  LiveJobSearchResponse,
   LearningRoadmap,
   LoginCredentials,
   PaginatedResponse,
@@ -67,8 +68,8 @@ export const resumeApi = {
 };
 
 export const jobsApi = {
-  list: (params?: Record<string, string | number | boolean>) =>
-    api.get<PaginatedResponse<Job>>('/jobs/', { params }),
+  search: (params?: Record<string, string | number | boolean>) =>
+    api.get<LiveJobSearchResponse>('/jobs/', { params, timeout: 120_000 }),
 
   get: (id: string) => api.get<Job>(`/jobs/${id}/`),
 };
@@ -76,7 +77,9 @@ export const jobsApi = {
 export const savedJobsApi = {
   list: () =>
     api.get<PaginatedResponse<SavedJob> | SavedJob[]>('/jobs/saved/').then((r) => unwrapList(r.data)),
-  save: (jobId: string, notes?: string) =>
+  save: (job: Job, notes?: string) =>
+    api.post<SavedJob>('/jobs/saved/', { job, notes }),
+  saveById: (jobId: string, notes?: string) =>
     api.post<SavedJob>('/jobs/saved/', { job_id: jobId, notes }),
   updateNotes: (id: string, notes: string) =>
     api.patch<SavedJob>(`/jobs/saved/${id}/notes/`, { notes }),
@@ -84,8 +87,11 @@ export const savedJobsApi = {
 };
 
 export const recommendationsApi = {
-  list: (topK = 10) => api.get<Recommendation[]>('/recommendations/', { params: { top_k: topK } }),
-  generate: (topK = 10) => api.post<Recommendation[]>('/recommendations/', { top_k: topK }),
+  list: (topK = 10) =>
+    api.get<Recommendation[]>('/recommendations/', { params: { top_k: topK } }),
+
+  generate: (topK = 10) =>
+    api.post<Recommendation[]>('/recommendations/', { top_k: topK }, { timeout: 180_000 }),
   get: (id: string) => api.get<Recommendation>(`/recommendations/${id}/`),
   learningRoadmap: (skills?: string) =>
     api.get<LearningRoadmap>('/recommendations/learning/', {
@@ -103,6 +109,8 @@ export const applicationsApi = {
       .then((r) => unwrapList(r.data)),
   create: (jobId: string, status = 'applied') =>
     api.post<Application>('/applications/', { job_id: jobId, status }),
+  createFromJob: (job: Job, status = 'applied') =>
+    api.post<Application>('/applications/', { job_payload: job, status }),
   update: (id: string, data: Partial<Application>) =>
     api.patch<Application>(`/applications/${id}/`, data),
   delete: (id: string) => api.delete(`/applications/${id}/`),

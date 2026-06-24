@@ -42,6 +42,7 @@ export function useRefreshRecommendations() {
     mutationFn: () => import('../api/endpoints').then((m) => m.recommendationsApi.generate()),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['recommendations'] });
+      queryClient.invalidateQueries({ queryKey: ['learning-roadmap'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard'] });
     },
   });

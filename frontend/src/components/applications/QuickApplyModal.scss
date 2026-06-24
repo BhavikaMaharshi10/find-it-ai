@@ -1,0 +1,60 @@
+@use '../../styles/abstracts/variables' as *;
+@use '../../styles/abstracts/mixins' as *;
+
+.quick-apply-modal__backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(4px);
+}
+
+.quick-apply-modal__container {
+  position: fixed;
+  inset: 0;
+  z-index: $z-modal + 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-lg;
+  pointer-events: none;
+}
+
+.quick-apply-modal {
+  width: min(440px, 100%);
+  padding: $spacing-xl;
+  pointer-events: auto;
+  @include glass-panel;
+
+  &__title {
+    margin: 0 0 $spacing-sm;
+    font-size: $font-size-xl;
+    font-weight: $font-weight-semibold;
+  }
+
+  &__subtitle {
+    margin: 0 0 $spacing-lg;
+    line-height: 1.5;
+
+    strong {
+      color: var(--color-text-primary);
+    }
+  }
+
+  &__error {
+    margin: 0 0 $spacing-md;
+    color: var(--color-error);
+    font-size: $font-size-sm;
+  }
+
+  &__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-sm;
+    justify-content: flex-end;
+
+    .btn {
+      text-decoration: none;
+    }
+  }
+}

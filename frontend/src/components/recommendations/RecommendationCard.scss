@@ -1,0 +1,186 @@
+@use '../../styles/abstracts' as *;
+
+.recommendation-card {
+  @include glass-panel;
+  padding: $spacing-xl;
+  position: relative;
+  overflow: hidden;
+  transition: border-color $transition-base, box-shadow $transition-base;
+
+  &:hover {
+    border-color: rgba($accent-primary, 0.3);
+    box-shadow: $shadow-lg, $glow-accent-sm;
+  }
+
+  &__glow {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: $gradient-accent;
+    opacity: 0.6;
+  }
+
+  &__header {
+    @include flex-between;
+    align-items: flex-start;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-md;
+  }
+
+  &__info {
+    flex: 1;
+    min-width: 0;
+
+    .ai-badge-component {
+      margin-bottom: $spacing-sm;
+    }
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    margin-bottom: $spacing-xs;
+  }
+
+  &__company {
+    color: var(--color-text-secondary);
+    font-size: $font-size-sm;
+    margin-bottom: $spacing-sm;
+  }
+
+  &__meta {
+    display: flex;
+    gap: $spacing-md;
+    font-size: $font-size-sm;
+    color: var(--color-text-secondary);
+  }
+
+  &__skills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__insight {
+    @include glassmorphism(0.3);
+    padding: $spacing-md;
+    border-radius: $radius-lg;
+    margin-bottom: $spacing-md;
+    border-left: 2px solid $accent-primary;
+  }
+
+  &__insight-label {
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: $accent-glow;
+    margin-bottom: $spacing-xs;
+    display: block;
+  }
+
+  &__reasoning {
+    font-size: $font-size-sm;
+    line-height: $line-height-relaxed;
+    color: var(--color-text-secondary);
+  }
+
+  &__strengths,
+  &__gaps {
+    margin-bottom: $spacing-md;
+  }
+
+  &__section-label {
+    display: block;
+    font-size: $font-size-xs;
+    font-weight: $font-weight-semibold;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--color-text-secondary);
+    margin-bottom: $spacing-sm;
+  }
+
+  &__tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: $spacing-xs;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-sm;
+    justify-content: flex-end;
+    padding-top: $spacing-md;
+    border-top: 1px solid var(--color-border);
+  }
+}
+
+.recommendations-page {
+  &__header {
+    @include flex-between;
+    margin-bottom: $spacing-2xl;
+    flex-wrap: wrap;
+    gap: $spacing-md;
+  }
+
+  &__title-group {
+    h1 {
+      margin-bottom: $spacing-xs;
+    }
+  }
+
+  &__list {
+    display: grid;
+    gap: $spacing-lg;
+    margin-bottom: $spacing-2xl;
+  }
+
+  &__roadmap {
+    margin-top: $spacing-2xl;
+
+    h2 {
+      margin-bottom: $spacing-sm;
+    }
+  }
+
+  &__roadmap-steps {
+    display: grid;
+    gap: $spacing-md;
+    margin-top: $spacing-lg;
+  }
+
+  &__roadmap-step {
+    @include glass-panel;
+    padding: $spacing-lg;
+    display: flex;
+    gap: $spacing-md;
+    align-items: flex-start;
+  }
+
+  &__step-number {
+    @include flex-center;
+    width: 32px;
+    height: 32px;
+    border-radius: $radius-full;
+    background: rgba($accent-primary, 0.15);
+    color: $accent-glow;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-bold;
+    flex-shrink: 0;
+    border: 1px solid rgba($accent-primary, 0.25);
+  }
+
+  &__empty {
+    @include glass-panel;
+    padding: $spacing-3xl;
+    text-align: center;
+
+    p {
+      color: var(--color-text-secondary);
+      max-width: 400px;
+      margin: $spacing-md auto 0;
+    }
+  }
+}

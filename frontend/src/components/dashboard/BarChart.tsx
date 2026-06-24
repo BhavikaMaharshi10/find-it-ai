@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import './DashboardCharts.scss';
 
 interface BarChartProps {
@@ -13,22 +14,29 @@ export function BarChart({ data, title }: BarChartProps) {
   const max = Math.max(...items.map((i) => i.value), 1);
 
   return (
-    <div className="chart-card">
+    <motion.div
+      className="chart-card"
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
       <h3>{title}</h3>
       <div className="bar-chart">
-        {items.map((item) => (
+        {items.map((item, i) => (
           <div key={item.label} className="bar-chart__row">
             <span className="bar-chart__label">{item.label}</span>
             <div className="bar-chart__bar-wrap">
-              <div
+              <motion.div
                 className="bar-chart__bar"
-                style={{ width: `${(item.value / max) * 100}%` }}
+                initial={{ width: 0 }}
+                animate={{ width: `${(item.value / max) * 100}%` }}
+                transition={{ duration: 0.8, delay: i * 0.05, ease: [0.4, 0, 0.2, 1] }}
               />
             </div>
             <span className="bar-chart__value">{item.value}</span>
           </div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }

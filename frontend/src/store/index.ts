@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '../types';
-import { REFRESH_KEY, THEME_KEY, TOKEN_KEY } from '../utils/constants';
+import { REFRESH_KEY, TOKEN_KEY } from '../utils/constants';
 
 interface AuthState {
   user: User | null;
@@ -37,37 +37,16 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
+      onRehydrateStorage: () => (state) => {
+        if (!state) return;
+        const hasTokens = Boolean(
+          localStorage.getItem(TOKEN_KEY) && localStorage.getItem(REFRESH_KEY),
+        );
+        if (state.isAuthenticated && !hasTokens) {
+          state.clearAuth();
+        }
+      },
     },
-  ),
-);
-
-type Theme = 'light' | 'dark';
-
-interface ThemeState {
-  theme: Theme;
-  toggleTheme: () => void;
-  setTheme: (theme: Theme) => void;
-}
-
-export const useThemeStore = create<ThemeState>()(
-  persist(
-    (set, get) => ({
-      theme: 'light',
-
-      toggleTheme: () => {
-        const next = get().theme === 'light' ? 'dark' : 'light';
-        document.documentElement.setAttribute('data-theme', next);
-        localStorage.setItem(THEME_KEY, next);
-        set({ theme: next });
-      },
-
-      setTheme: (theme) => {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem(THEME_KEY, theme);
-        set({ theme });
-      },
-    }),
-    { name: 'finditai-theme' },
   ),
 );
 

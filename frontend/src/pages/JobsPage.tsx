@@ -1,25 +1,50 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
-import { applicationsApi, jobsApi, savedJobsApi } from '../api/endpoints';
+import { isAxiosError } from 'axios';
+import QuickApplyModal from '../components/applications/QuickApplyModal';
+import { jobsApi, savedJobsApi } from '../api/endpoints';
+import Button from '../components/common/Button';
 import JobCard from '../components/jobs/JobCard';
+import type { Job, LiveJobSearchResponse } from '../types';
 import '../components/jobs/JobCard.scss';
+import '../components/dashboard/DashboardCharts.scss';
+
+interface SearchFilters {
+  search: string;
+  isRemote: string;
+  experience: string;
+}
+
+const EMPTY_FILTERS: SearchFilters = { search: '', isRemote: '', experience: '' };
+
+function buildSearchParams(filters: SearchFilters) {
+  return {
+    search: filters.search,
+    ...(filters.isRemote !== '' ? { is_remote: filters.isRemote } : {}),
+    ...(filters.experience ? { experience_level: filters.experience } : {}),
+  };
+}
 
 export default function JobsPage() {
-  const [search, setSearch] = useState('');
-  const [isRemote, setIsRemote] = useState<string>('');
-  const [experience, setExperience] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>(EMPTY_FILTERS);
+  const [searchError, setSearchError] = useState<string | null>(null);
+  const [applyJob, setApplyJob] = useState<Job | null>(null);
   const queryClient = useQueryClient();
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['jobs', search, isRemote, experience],
-    queryFn: () =>
-      jobsApi
-        .list({
-          search,
-          ...(isRemote !== '' ? { is_remote: isRemote } : {}),
-          ...(experience ? { experience_level: experience } : {}),
-        })
-        .then((r) => r.data),
+  const searchMutation = useMutation({
+    mutationFn: (nextFilters: SearchFilters) =>
+      jobsApi.search(buildSearchParams(nextFilters)).then((r) => r.data),
+    onMutate: () => setSearchError(null),
+    onError: (error) => {
+      if (isAxiosError(error) && error.code === 'ERR_CANCELED') {
+        return;
+      }
+      const message = isAxiosError(error)
+        ? (error.response?.data as { detail?: string } | undefined)?.detail ??
+          error.message
+        : 'Search failed. Please try again.';
+      setSearchError(message);
+    },
   });
 
   const { data: savedJobs } = useQuery({
@@ -27,22 +52,36 @@ export default function JobsPage() {
     queryFn: () => savedJobsApi.list(),
   });
 
-  const savedIds = new Set(savedJobs?.map((s) => s.job.id) ?? []);
+  const savedKeys = new Set(
+    savedJobs?.map((s) => `${s.job.source ?? 'seed'}:${s.job.external_id ?? s.job.id}`) ?? [],
+  );
 
-  const handleSave = async (jobId: string) => {
-    await savedJobsApi.save(jobId);
+  const handleApplyFilters = () => {
+    searchMutation.mutate({ ...filters });
+  };
+
+  const handleSave = async (job: Job) => {
+    await savedJobsApi.save(job);
     queryClient.invalidateQueries({ queryKey: ['saved-jobs'] });
   };
 
-  const handleApply = async (jobId: string) => {
-    await applicationsApi.create(jobId);
+  const handleQuickApply = (job: Job) => {
+    if (job.source_url) {
+      window.open(job.source_url, '_blank', 'noopener,noreferrer');
+    }
+    setApplyJob(job);
   };
+
+  const data: LiveJobSearchResponse | undefined = searchMutation.data;
+  const results = data?.results ?? [];
+  const hasSearched =
+    searchMutation.isPending || searchMutation.isSuccess || searchMutation.isError;
 
   return (
     <div>
       <h1>Job Search</h1>
       <p className="text-secondary" style={{ marginBottom: '1.5rem' }}>
-        Discover opportunities matched to your profile
+        Live openings from Remotive, Lever, and Greenhouse — fetched in real time
       </p>
 
       <div className="job-filters">
@@ -51,14 +90,20 @@ export default function JobsPage() {
           <input
             id="search"
             className="input"
-            placeholder="Title, company, skills..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            placeholder="e.g. developer, engineer..."
+            value={filters.search}
+            onChange={(e) => setFilters((f) => ({ ...f, search: e.target.value }))}
+            onKeyDown={(e) => e.key === 'Enter' && handleApplyFilters()}
           />
         </div>
         <div>
           <label htmlFor="remote">Remote</label>
-          <select id="remote" className="input" value={isRemote} onChange={(e) => setIsRemote(e.target.value)}>
+          <select
+            id="remote"
+            className="input"
+            value={filters.isRemote}
+            onChange={(e) => setFilters((f) => ({ ...f, isRemote: e.target.value }))}
+          >
             <option value="">All</option>
             <option value="true">Remote</option>
             <option value="false">On-site</option>
@@ -66,7 +111,12 @@ export default function JobsPage() {
         </div>
         <div>
           <label htmlFor="exp">Experience</label>
-          <select id="exp" className="input" value={experience} onChange={(e) => setExperience(e.target.value)}>
+          <select
+            id="exp"
+            className="input"
+            value={filters.experience}
+            onChange={(e) => setFilters((f) => ({ ...f, experience: e.target.value }))}
+          >
             <option value="">All levels</option>
             <option value="junior">Junior</option>
             <option value="mid">Mid</option>
@@ -74,29 +124,52 @@ export default function JobsPage() {
             <option value="lead">Lead</option>
           </select>
         </div>
+        <div className="job-filters__apply">
+          <Button onClick={handleApplyFilters} loading={searchMutation.isPending}>
+            Apply
+          </Button>
+        </div>
       </div>
 
-      {isLoading ? (
-        <p>Loading jobs...</p>
-      ) : (
-        <div className="job-list">
-          {data?.results.map((job) => (
-            <JobCard
-              key={job.id}
-              title={job.title}
-              company={job.company}
-              location={job.location}
-              isRemote={job.is_remote}
-              skills={job.required_skills}
-              salaryRange={job.salary_range}
-              isSaved={savedIds.has(job.id)}
-              onSave={() => handleSave(job.id)}
-              onApply={() => handleApply(job.id)}
-            />
-          ))}
-          {data?.results.length === 0 && <p>No jobs found.</p>}
+      {!hasSearched ? (
+        <p className="text-secondary">Set your filters and click Apply to search live job openings.</p>
+      ) : searchMutation.isPending ? (
+        <div className="dashboard-loading">
+          <div className="dashboard-loading__spinner" />
+          <span>Fetching live jobs from Remotive, Lever, and Greenhouse…</span>
         </div>
+      ) : searchMutation.isError && !data ? (
+        <p className="text-error" style={{ color: 'var(--color-error)' }}>
+          {searchError ?? 'Search failed. Check that the backend is running and try again.'}
+        </p>
+      ) : (
+        <>
+          <p className="text-secondary" style={{ marginBottom: '1rem' }}>
+            {results.length} result{results.length !== 1 ? 's' : ''}
+            {data?.cached ? ' (cached)' : ''}
+          </p>
+          <div className="job-list">
+            {results.map((job) => (
+              <JobCard
+                key={job.external_key ?? job.id}
+                title={job.title}
+                company={job.company}
+                location={job.location}
+                isRemote={job.is_remote}
+                skills={job.required_skills}
+                salaryRange={job.salary_range}
+                isSaved={savedKeys.has(`${job.source}:${job.external_id}`)}
+                onSave={() => handleSave(job)}
+                onApply={() => handleQuickApply(job)}
+              />
+            ))}
+            {results.length === 0 && (
+              <p>No jobs match your filters. Try different keywords — search matches title and company only.</p>
+            )}
+          </div>
+        </>
       )}
+      <QuickApplyModal job={applyJob} onClose={() => setApplyJob(null)} />
     </div>
   );
 }

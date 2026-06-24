@@ -20,16 +20,56 @@ class LearningRecommendationService(BaseService):
             return self._fallback_roadmap(skill_gaps)
 
         try:
-            return chat_completion_json(
+            result = chat_completion_json(
                 [{"role": "user", "content": LEARNING_ROADMAP_PROMPT.format(
                     skill_gaps=", ".join(skill_gaps),
                     profile_data=json.dumps(user_profile)[:2000],
                 )}],
                 temperature=0.4,
             )
+            return self._normalize_roadmap(result, skill_gaps)
         except Exception as e:
             self.logger.error("Learning roadmap failed: %s", e)
             return self._fallback_roadmap(skill_gaps)
+
+    def _normalize_roadmap(self, data: dict, skill_gaps: list) -> dict:
+        """Ensure roadmap response matches the expected API shape."""
+        roadmap = data.get("roadmap") or data.get("learning_roadmap") or data.get("steps") or []
+        if isinstance(roadmap, dict):
+            roadmap = roadmap.get("steps", [])
+
+        normalized = []
+        for i, step in enumerate(roadmap):
+            if isinstance(step, str):
+                normalized.append({
+                    "step": i + 1,
+                    "skill": step,
+                    "description": f"Develop proficiency in {step}",
+                    "estimated_weeks": 4,
+                })
+            elif isinstance(step, dict):
+                normalized.append({
+                    "step": step.get("step", i + 1),
+                    "skill": step.get("skill") or step.get("title") or f"Skill {i + 1}",
+                    "description": step.get("description", ""),
+                    "estimated_weeks": step.get("estimated_weeks", 4),
+                })
+
+        if not normalized and skill_gaps:
+            return self._fallback_roadmap(skill_gaps)
+
+        timeline = data.get("timeline", "")
+        if isinstance(timeline, (int, float)):
+            timeline = f"{int(timeline)} weeks estimated"
+        elif not timeline:
+            timeline = f"{len(skill_gaps) * 4} weeks estimated"
+
+        return {
+            "roadmap": normalized,
+            "courses": data.get("courses", []),
+            "certifications": data.get("certifications", []),
+            "timeline": str(timeline),
+        }
 
     def recommend_courses(self, skill_gaps: list) -> list:
         roadmap = self.generate_learning_roadmap(skill_gaps, {})

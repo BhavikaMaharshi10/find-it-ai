@@ -114,8 +114,14 @@ cp .env.example .env
 python scripts/enable_pgvector.py
 python manage.py migrate
 
-# Seed sample jobs
+# Seed sample jobs (optional — for local dev without network)
 python manage.py seed_jobs
+
+# Sync live jobs from free public APIs (Remotive, Lever, Greenhouse — no API keys)
+python manage.py sync_jobs
+
+# Skip embeddings if Gemini quota is low (jobs sync, matching needs embeddings later)
+python manage.py sync_jobs --skip-embeddings
 
 # Create superuser
 python manage.py createsuperuser

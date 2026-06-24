@@ -13,7 +13,7 @@ export default function Card({ children, className = '', hover = true, style }: 
     <motion.div
       className={`card ${className}`}
       style={style}
-      whileHover={hover ? { y: -2 } : undefined}
+      whileHover={hover ? { y: -3, transition: { duration: 0.2 } } : undefined}
       transition={{ duration: 0.2 }}
     >
       {children}

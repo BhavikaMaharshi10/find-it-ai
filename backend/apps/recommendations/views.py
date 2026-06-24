@@ -13,19 +13,16 @@ from .serializers import RecommendationDetailSerializer, RecommendationSerialize
 
 class RecommendationListView(APIView):
     def get(self, request):
-        service = RecommendationService()
-        top_k = int(request.query_params.get("top_k", 10))
-        results = service.find_similar_jobs(request.user, top_k=top_k)
-        stored = Recommendation.objects.filter(user=request.user).select_related("job")[:top_k]
-        return Response(RecommendationSerializer(stored, many=True).data)
+        # Recommendations are generated on demand from live job APIs.
+        return Response([])
 
     def post(self, request):
-        """Trigger fresh recommendation generation."""
+        """Generate matches from live job postings."""
         service = RecommendationService()
         top_k = int(request.data.get("top_k", 10))
-        service.find_similar_jobs(request.user, top_k=top_k)
-        stored = Recommendation.objects.filter(user=request.user).select_related("job")[:top_k]
-        return Response(RecommendationSerializer(stored, many=True).data)
+        refresh = request.data.get("refresh", False) in (True, "true", "1", 1)
+        results = service.find_live_matches(request.user, top_k=top_k, refresh=refresh)
+        return Response(results)
 
 
 class RecommendationDetailView(APIView):
@@ -44,10 +41,18 @@ class RecommendationDetailView(APIView):
 class LearningRoadmapView(APIView):
     def get(self, request):
         resume = Resume.objects.filter(user=request.user, is_active=True).first()
-        skill_gaps = request.query_params.get("skills", "").split(",")
-        if not skill_gaps or skill_gaps == [""]:
-            rec = Recommendation.objects.filter(user=request.user).first()
-            skill_gaps = rec.missing_skills if rec else []
+        skills_param = request.query_params.get("skills", "").strip()
+        if skills_param:
+            skill_gaps = [s.strip() for s in skills_param.split(",") if s.strip()]
+        else:
+            skill_gaps = []
+            seen = set()
+            for rec in Recommendation.objects.filter(user=request.user):
+                for skill in rec.missing_skills or []:
+                    key = skill.lower().strip()
+                    if key and key not in seen:
+                        seen.add(key)
+                        skill_gaps.append(skill)
 
         service = LearningRecommendationService()
         roadmap = service.generate_learning_roadmap(

@@ -1,29 +1,28 @@
 @use '../abstracts' as *;
 
 :root {
-  --color-primary: #{$primary-dark};
-  --color-secondary: #{$secondary-dark};
-  --color-neutral: #{$neutral-medium};
-  --color-neutral-light: #{$neutral-light};
-  --color-background: #{$background};
-  --color-surface: #ffffff;
+  color-scheme: dark;
+  --color-bg-primary: #{$bg-primary};
+  --color-bg-secondary: #{$bg-secondary};
+  --color-surface: #{$surface};
+  --color-primary: #{$accent-primary};
+  --color-secondary: #{$accent-secondary};
+  --color-accent-glow: #{$accent-glow};
+  --color-neutral: #{$text-secondary};
+  --color-neutral-light: #{$accent-glow};
+  --color-background: #{$bg-primary};
   --color-text: #{$text-primary};
   --color-text-secondary: #{$text-secondary};
   --color-border: #{$border-color};
+  --color-border-strong: #{$border-color-strong};
   --color-success: #{$success};
   --color-warning: #{$warning};
   --color-error: #{$error};
   --color-info: #{$info};
-}
-
-[data-theme='dark'] {
-  --color-primary: #{$neutral-light};
-  --color-secondary: #{$neutral-medium};
-  --color-background: #{$primary-dark};
-  --color-surface: #{$secondary-dark};
-  --color-text: #{$background};
-  --color-text-secondary: #{$neutral-light};
-  --color-border: rgba(#{$neutral-medium}, 0.3);
+  --gradient-accent: #{$gradient-accent};
+  --shadow-glow: #{$glow-accent};
+  --font-display: #{$font-family-display};
+  --font-body: #{$font-family};
 }
 
 *,
@@ -42,12 +41,15 @@ html {
 }
 
 body {
-  font-family: $font-family;
+  font-family: var(--font-body);
   font-size: $font-size-base;
   line-height: $line-height-normal;
   color: var(--color-text);
   background-color: var(--color-background);
   min-height: 100vh;
+  background-image:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba($accent-primary, 0.12), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 100%, rgba($accent-secondary, 0.08), transparent);
 }
 
 img,
@@ -71,7 +73,7 @@ a {
   text-decoration: none;
 
   &:hover {
-    text-decoration: underline;
+    text-decoration: none;
   }
 }
 
@@ -81,9 +83,11 @@ ol {
 }
 
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
   font-weight: $font-weight-semibold;
   line-height: $line-height-tight;
   color: var(--color-text);
+  letter-spacing: -0.02em;
 }
 
 h1 { font-size: $font-size-4xl; }

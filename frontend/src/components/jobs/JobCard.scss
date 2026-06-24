@@ -1,27 +1,31 @@
 @use '../../styles/abstracts' as *;
 
 .job-card {
+  @include glass-panel;
+  padding: $spacing-lg;
+  transition: border-color $transition-base, box-shadow $transition-base, transform $transition-base;
+
+  &:hover {
+    border-color: rgba($accent-primary, 0.25);
+    box-shadow: $shadow-md, $glow-accent-sm;
+    transform: translateY(-2px);
+  }
+
   &__header {
     @include flex-between;
+    align-items: flex-start;
+    gap: $spacing-md;
     margin-bottom: $spacing-sm;
   }
 
   &__title {
     font-size: $font-size-lg;
     margin-bottom: $spacing-xs;
+    font-weight: $font-weight-semibold;
   }
 
   &__company {
     color: var(--color-text-secondary);
-    font-size: $font-size-sm;
-  }
-
-  &__score {
-    background: linear-gradient(135deg, $primary-dark, $neutral-medium);
-    color: white;
-    padding: $spacing-xs $spacing-md;
-    border-radius: $radius-full;
-    font-weight: $font-weight-bold;
     font-size: $font-size-sm;
   }
 
@@ -44,18 +48,20 @@
     display: flex;
     gap: $spacing-sm;
     justify-content: flex-end;
+    padding-top: $spacing-sm;
+    border-top: 1px solid var(--color-border);
   }
 }
 
 .job-filters {
-  @include card;
+  @include glass-panel;
   padding: $spacing-lg;
   margin-bottom: $spacing-lg;
   display: grid;
   gap: $spacing-md;
 
   @include respond-to(md) {
-    grid-template-columns: 2fr 1fr 1fr 1fr auto;
+    grid-template-columns: 2fr 1fr 1fr auto;
     align-items: end;
   }
 
@@ -64,6 +70,16 @@
     font-size: $font-size-sm;
     color: var(--color-text-secondary);
     margin-bottom: $spacing-xs;
+  }
+
+  &__apply {
+    display: flex;
+    align-items: flex-end;
+
+    .btn {
+      width: 100%;
+      min-width: 120px;
+    }
   }
 }
 

@@ -33,6 +33,8 @@ class Job(models.Model):
     salary_range = models.CharField(max_length=100, blank=True)
     employment_type = models.CharField(max_length=50, default="full-time")
     source_url = models.URLField(blank=True)
+    source = models.CharField(max_length=50, default="seed", db_index=True)
+    external_id = models.CharField(max_length=255, blank=True, default="", db_index=True)
     is_active = models.BooleanField(default=True)
     posted_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -41,6 +43,13 @@ class Job(models.Model):
     class Meta:
         db_table = "jobs"
         ordering = ["-posted_at", "-created_at"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["source", "external_id"],
+                condition=models.Q(external_id__gt=""),
+                name="jobs_unique_source_external_id",
+            ),
+        ]
 
     def __str__(self):
         return f"{self.title} at {self.company}"

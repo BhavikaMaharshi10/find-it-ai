@@ -1,5 +1,6 @@
 import { Outlet, Link } from 'react-router-dom';
 import { ROUTES } from '../utils/constants';
+import { IconSparkles } from '../components/common/Icons';
 import './PublicLayout.scss';
 
 export default function PublicLayout() {
@@ -8,7 +9,8 @@ export default function PublicLayout() {
       <header className="public-layout__header">
         <div className="container public-layout__header-inner">
           <Link to={ROUTES.HOME} className="public-layout__logo">
-            FindIt<span>AI</span>
+            <IconSparkles size={20} />
+            <span>FindIt<span className="gradient-text">AI</span></span>
           </Link>
           <nav className="public-layout__nav" aria-label="Main navigation">
             <Link to={ROUTES.LOGIN} className="btn btn--ghost">

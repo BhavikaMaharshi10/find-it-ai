@@ -3,7 +3,6 @@ export const API_BASE_URL =
 
 export const TOKEN_KEY = 'finditai_access_token';
 export const REFRESH_KEY = 'finditai_refresh_token';
-export const THEME_KEY = 'finditai_theme';
 
 export const APPLICATION_STATUSES = [
   { value: 'applied', label: 'Applied' },
